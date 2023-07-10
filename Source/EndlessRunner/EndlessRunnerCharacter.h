@@ -39,8 +39,8 @@ class AEndlessRunnerCharacter : public ACharacter
 
 public:
 	AEndlessRunnerCharacter();
-	
 
+	void SetUpInput(UInputMappingContext* InputMappingContext);	
 protected:
 
 	/** Called for movement input */

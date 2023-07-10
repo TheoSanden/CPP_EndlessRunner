@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "EndlessRunnerCharacter.h"
+
+#include "EndlessRunnerGameMode.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -9,6 +11,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "SNegativeActionButton.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -31,7 +35,7 @@ AEndlessRunnerCharacter::AEndlessRunnerCharacter()
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->AirControl = 0.35f;	
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
@@ -59,14 +63,6 @@ void AEndlessRunnerCharacter::BeginPlay()
 	const auto Movement = GetCharacterMovement();
 	Movement->bConstrainToPlane = true;
 	Movement->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::X);
-	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,8 +70,17 @@ void AEndlessRunnerCharacter::BeginPlay()
 
 void AEndlessRunnerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
+	AEndlessRunnerGameMode* GameMode = Cast<AEndlessRunnerGameMode>(GetWorld()->GetAuthGameMode());
+	
+	if(GameMode != nullptr)
+	{
+		UInputMappingContext* InputMappingContext = GameMode->GetInputMappingContext();
+		UE_LOG(LogTemp,Warning,TEXT("%s"), *InputMappingContext->GetName());
+		SetUpInput(InputMappingContext);
+	}
+	
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)){
 		
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
@@ -124,6 +129,18 @@ void AEndlessRunnerCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AEndlessRunnerCharacter::SetUpInput(UInputMappingContext* InputMappingContext)
+{
+	//Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(InputMappingContext, 0);
+		}
 	}
 }
 
