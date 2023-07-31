@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "EndlessRunnerCharacter.h"
+
 #include "EndlessRunnerGameMode.generated.h"
 
 class UInputMappingContext;
@@ -18,10 +20,16 @@ protected:
 	UInputMappingContext* PlayerOneInputMappingContext;
 	UPROPERTY()
 	UInputMappingContext* PlayerTwoInputMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Classes)
+	TSubclassOf<APawn> PlayerToSpawn;
 
 public:
+
+	virtual void BeginPlay() override;
 	//0 == 1 
 	UInputMappingContext* GetInputMappingContext();
+
+	void SpawnPlayer();
 	
 	AEndlessRunnerGameMode();
 };

@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "EndlessRunnerCharacter.generated.h"
 
+class APlayerController;
 
 UCLASS(config=Game)
 class AEndlessRunnerCharacter : public ACharacter
@@ -40,7 +42,7 @@ class AEndlessRunnerCharacter : public ACharacter
 public:
 	AEndlessRunnerCharacter();
 
-	void SetUpInput(UInputMappingContext* InputMappingContext);	
+	void SetUpInput(UInputMappingContext* InputMappingContext, APlayerController* PlayerController);
 protected:
 
 	/** Called for movement input */

@@ -4,6 +4,8 @@
 #include "InputMappingContext.h"
 #include "EndlessRunnerCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "GameFramework/PlayerStart.h"
+#include "Kismet/GameplayStatics.h"
 
 AEndlessRunnerGameMode::AEndlessRunnerGameMode()
 {
@@ -11,7 +13,8 @@ AEndlessRunnerGameMode::AEndlessRunnerGameMode()
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
+		PlayerToSpawn = PlayerPawnBPClass.Class;
+		DefaultPawnClass = NULL;
 	}
 	
 	const wchar_t* DataAssetPath = TEXT("/Game/Content/Input/IMC_PlayerOne.IMC_PlayerOne");
@@ -47,6 +50,29 @@ UInputMappingContext* AEndlessRunnerGameMode::GetInputMappingContext()
 			return PlayerOneInputMappingContext;
 		case 1:
 			return PlayerTwoInputMappingContext;
+	}
+}
+
+void AEndlessRunnerGameMode::BeginPlay()
+{
+	SpawnPlayer();
+}
+
+void AEndlessRunnerGameMode::SpawnPlayer()
+{
+
+	TArray<AActor*> PlayerStarts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
+	FActorSpawnParameters SpawnInfo;
+
+	//UE_LOG(LogTemp, Warning, TEXT("Player start count, %s"), *FString::SanitizeFloat(PlayerStarts.Num));
+	APlayerController* controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	for(AActor* Start: PlayerStarts)
+	{
+		AEndlessRunnerCharacter* player = GetWorld()->SpawnActor<AEndlessRunnerCharacter>(PlayerToSpawn,Start->GetActorLocation() ,Start->GetActorRotation());
+		player->SetUpInput(GetInputMappingContext());
+		controller->Possess(player);
 	}
 }
 

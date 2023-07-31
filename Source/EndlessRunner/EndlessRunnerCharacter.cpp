@@ -63,6 +63,28 @@ void AEndlessRunnerCharacter::BeginPlay()
 	const auto Movement = GetCharacterMovement();
 	Movement->bConstrainToPlane = true;
 	Movement->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::X);
+
+	/*AEndlessRunnerGameMode* GameMode = Cast<AEndlessRunnerGameMode>(GetWorld()->GetAuthGameMode());
+	
+	if (GameMode != nullptr)
+	{
+		UInputMappingContext* InputMappingContext = GameMode->GetInputMappingContext();
+
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *InputMappingContext->GetName());
+
+		if(InputMappingContext == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("InputMappingContext null"));
+		}
+		else
+		{
+			SetUpInput(InputMappingContext);
+		}
+	}
+	else
+	{
+		SetUpInput(DefaultMappingContext);
+	}*/
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -70,15 +92,7 @@ void AEndlessRunnerCharacter::BeginPlay()
 
 void AEndlessRunnerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	AEndlessRunnerGameMode* GameMode = Cast<AEndlessRunnerGameMode>(GetWorld()->GetAuthGameMode());
-	
-	if(GameMode != nullptr)
-	{
-		UInputMappingContext* InputMappingContext = GameMode->GetInputMappingContext();
-		UE_LOG(LogTemp,Warning,TEXT("%s"), *InputMappingContext->GetName());
-		SetUpInput(InputMappingContext);
-	}
-	
+
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)){
 		
@@ -132,12 +146,13 @@ void AEndlessRunnerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AEndlessRunnerCharacter::SetUpInput(UInputMappingContext* InputMappingContext)
+void AEndlessRunnerCharacter::SetUpInput(UInputMappingContext* InputMappingContext, APlayerController* _Controller)
 {
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	//APlayerController* PlayerController = Cast<APlayerController>(Controller)
+	if (_Controller)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(_Controller->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(InputMappingContext, 0);
 		}
