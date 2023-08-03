@@ -60,58 +60,65 @@ void AEndlessRunnerCharacter::BeginPlay()
 	Movement->bConstrainToPlane = true;
 	Movement->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::X);
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void AEndlessRunnerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+/*void AEndlessRunnerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+	Internal_PlayerInputComponent = PlayerInputComponent;
+}
+
+void AEndlessRunnerCharacter::SetUpPlayerInputComponent_External(class UInputAction* JumpAction, class UInputAction* MoveAction, class UInputAction* LookAction)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(Internal_PlayerInputComponent)) {
+
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AEndlessRunnerCharacter::Move);
-
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AEndlessRunnerCharacter::Look);
-
 	}
-
+void AEndlessRunnerCharacter::SetUpInputMappingContext(UInputMappingContext* InputMappingContext, APlayerController* _Controller)
+{
+	//APlayerController* PlayerController = Cast<APlayerController>(Controller)
+	if (_Controller)
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(_Controller->GetLocalPlayer()))
+		{
+			if(InputMappingContext == nullptr)
+			{
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+				return;
+			}
+			Subsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
 }
+
+}*/
+
 
 void AEndlessRunnerCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
+	// find out which way is forward
+	const FRotator Rotation = GetActorRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	// get forward vector
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	// get right vector 
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	// add movement 
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	AddMovementInput(RightDirection, MovementVector.X);
 }
 
 void AEndlessRunnerCharacter::Look(const FInputActionValue& Value)
@@ -126,6 +133,7 @@ void AEndlessRunnerCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
 
 
 
