@@ -21,16 +21,12 @@ void AObstacleSpawner::BeginPlay()
 	Super::BeginPlay();
 	ObstaclePooler = new ActorPooler<AMovingDirectionalObject>(GetWorld(), ObstacleToSpawn);
 	ObstaclePooler->Populate(30);
+	CurrentObjectSpeed = DeafultObjectSpeed;
+	DefaultSpawnSpawnRate = SpawnRateInSeconds;
 }
 
 void AObstacleSpawner::Spawn(FVector Position)
 {
-	//Move this code to the objectpooler later
-	//TObjectPtr<AMovingDirectionalObject> NewObstacle = GetWorld()->SpawnActor<AMovingDirectionalObject>(ObstacleToSpawn, FVector(0,0,0), FRotator(0, 0, 0));
-	//ActiveObstacles.Add(NewObstacle);
-	//AMovingDirectionalObject* NewObstacle = GetWorld()->SpawnActor<AMovingDirectionalObject>(ObstacleToSpawn, FVector(0, 0, 0), FRotator(0, 0, 0));
-	//NewObstacle->Set(GetActorLocation(), ObstacleTravelDirection.GetSafeNormal());
-
 	TObjectPtr<AMovingDirectionalObject> NewObstacle = ObstaclePooler->Pop();
 	ActiveObjects.Add(NewObstacle);
 	if(DeafultObjectSpeed == 0)
@@ -39,7 +35,7 @@ void AObstacleSpawner::Spawn(FVector Position)
 	}
 	else
 	{
-		NewObstacle->Set(Position, ObstacleTravelDirection.GetSafeNormal(), DeafultObjectSpeed);
+		NewObstacle->Set(Position, ObstacleTravelDirection.GetSafeNormal(), CurrentObjectSpeed);
 	}
 }
 void AObstacleSpawner::CheckSpawn(float DeltaTime)
@@ -48,7 +44,7 @@ void AObstacleSpawner::CheckSpawn(float DeltaTime)
 	if(SpawnTimer >= SpawnRateInSeconds)
 	{
 		FVector position = GetActorLocation();
-		FVector overShoot = ObstacleTravelDirection.GetSafeNormal() *  (SpawnTimer-SpawnRateInSeconds) * DeafultObjectSpeed;
+		FVector overShoot = ObstacleTravelDirection.GetSafeNormal() *  (SpawnTimer-SpawnRateInSeconds) * CurrentObjectSpeed;
 		Spawn(position + overShoot);
 		SpawnTimer -= SpawnRateInSeconds;
 	}
@@ -61,6 +57,16 @@ void AObstacleSpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CheckSpawn(DeltaTime);
 	CheckObstacleReachEnd();
+
+	if(SpeedIncreaseTimer >= SpeedIncreaseFrequency)
+	{
+		SpeedIncreaseTimer = 0;
+		CurrentObjectSpeed += SpeedIncreaseAmount;
+
+		SpawnRateInSeconds = DefaultSpawnSpawnRate * ( DeafultObjectSpeed/CurrentObjectSpeed);
+		UpdateObjectSpeed(CurrentObjectSpeed);
+	}
+	SpeedIncreaseTimer += DeltaTime;
 }
 void AObstacleSpawner::CheckObstacleReachEnd()
 {
@@ -74,6 +80,7 @@ void AObstacleSpawner::CheckObstacleReachEnd()
 		TObjectPtr<AMovingDirectionalObject> obj = ActiveObjects[0];
 		ActiveObjects.RemoveAt(0,1,true);
 		ObstaclePooler->Enqueue(obj);
+		
 	}
 }
 

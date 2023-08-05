@@ -18,20 +18,6 @@ AEndlessRunnerGameMode::AEndlessRunnerGameMode()
 		DefaultPawnClass = NULL;
 	}
 
-	/*static ConstructorHelpers::FObjectFinder<UInputMappingContext> PlayerOneInput(TEXT("/Game/ThirdPerson/Input/IMC_PlayerOne.IMC_PlayerOne"));
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> PlayerTwoInput(TEXT("/Game/ThirdPerson/Input/IMC_PlayerTwo.IMC_PlayerTwo"));
-
-	if(PlayerOneInput.Object == NULL || PlayerTwoInput.Object ==  NULL)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Input mappings not found"))
-		
-	}
-	else
-	{
-		PlayerInputMappings.Add(PlayerOneInput.Object);
-		PlayerInputMappings.Add(PlayerTwoInput.Object);
-	}*/
-
 	const wchar_t* DataAssetPath = TEXT("/Game/Input/DA_PlayerInput.DA_PlayerInput");
 	static ConstructorHelpers::FObjectFinder<UDA_PlayerInput>DA_PlayerInput(DataAssetPath);
 
@@ -45,22 +31,32 @@ AEndlessRunnerGameMode::AEndlessRunnerGameMode()
 
 	if (LocalMultiplayerInputManagerReference.Class != NULL)
 	{
-		LocalMultiplayerInputManager = LocalMultiplayerInputManagerReference.Class;
+		LocalMultiplayerInputManagerClass = LocalMultiplayerInputManagerReference.Class;
+	}
+	///Script/Engine.Blueprint'/Game/Ui/BP_ScoreTracker.BP_ScoreTracker'
+
+
+	DataAssetPath = TEXT("/Game/Ui/BP_ScoreTracker");
+	static ConstructorHelpers::FClassFinder<AActor>ScoreTrackerReference(DataAssetPath);
+
+	if (ScoreTrackerReference.Class != NULL)
+	{
+		ScoreTrackerClass = ScoreTrackerReference.Class;
 	}
 }
 void AEndlessRunnerGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	ScoreTracker = GetWorld()->SpawnActor<AScoreTracker>(ScoreTrackerClass, FVector::Zero(), FRotator::ZeroRotator);
 	InitializePlayerInput();
 }
 
 void AEndlessRunnerGameMode::InitializePlayerInput()
 {
-	TArray<AActor*> PlayerStarts;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),APlayerStart::StaticClass(), PlayerStarts);
 
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	LMIM_Instance = GetWorld()->SpawnActor<ALocalMultiplayerInputManager>(LocalMultiplayerInputManager, PlayerStarts[2]->GetActorLocation(), PlayerStarts[2]->GetActorRotation());
+	LMIM_Instance = GetWorld()->SpawnActor<ALocalMultiplayerInputManager>(LocalMultiplayerInputManagerClass, PlayerStarts[2]->GetActorLocation(), PlayerStarts[2]->GetActorRotation());
 
 	TArray<AMovableCharacter*> Players;
 
@@ -73,5 +69,33 @@ void AEndlessRunnerGameMode::InitializePlayerInput()
 	LMIM_Instance->RegisterPlayers(Players[0],Players[1]);
 	PlayerController->Possess(LMIM_Instance);
 	LMIM_Instance->SetUpInputMappingContext(nullptr,PlayerController);
+
+	ScoreTracker->UpdatePlayerHealth(0, 3);
+	ScoreTracker->UpdatePlayerHealth(1, 3);
+}
+
+void AEndlessRunnerGameMode::RespawnPlayer(AMovableCharacter* Character)
+{
+	int playerIndex = (Character->GetUniqueID() == LMIM_Instance->P1->GetUniqueID()) ? 0 : (Character->GetUniqueID() == LMIM_Instance->P2->GetUniqueID() ? 1 : 99);
+	if (playerIndex == 99) { return; }
+	Character->SetActorLocation(PlayerStarts[playerIndex]->GetActorLocation());
+
+	Character->CurrentLives -= 1;
+	Character->ResetVelocity();
+
+	ScoreTracker->UpdatePlayerHealth(playerIndex, Character->CurrentLives);
+
+
+
+	//Maybe move
+	float PointsLossAmount = 25;
+	ScoreTracker->ChangePlayerScore(playerIndex,-PointsLossAmount);
+}
+void AEndlessRunnerGameMode::ChangePlayerScore(AMovableCharacter* Character, int Amount)
+{
+	int playerIndex = (Character->GetUniqueID() == LMIM_Instance->P1->GetUniqueID()) ? 0 : (Character->GetUniqueID() == LMIM_Instance->P2->GetUniqueID() ? 1 : 99);
+	if (playerIndex == 99) { return; }
+
+	ScoreTracker->ChangePlayerScore(playerIndex, Amount);
 }
 

@@ -42,12 +42,15 @@ public:
 	virtual void RegisterPlayers(AMovableCharacter* PlayerOne, AMovableCharacter* PlayerTwo);
 
 	void P1_Move(const FInputActionValue& Value);
-	void P2_Move(const FInputActionValue& Value);
-
-	void P1_Jump();
 	void P1_StopMove();
 
-	void P2_Jump();
+	void P2_Move(const FInputActionValue& Value);
 	void P2_StopMove();
+
+	void P1_Jump();
+	void P1_StopJump();
+
+	void P2_Jump();
+	void P2_StopJump();
 
 };

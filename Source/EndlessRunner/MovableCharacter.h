@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "InputActionValue.h"
 #include "GameFramework/Actor.h"
@@ -16,26 +17,42 @@ class ENDLESSRUNNER_API AMovableCharacter : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AMovableCharacter();
-
 protected:
+
+	UPROPERTY()
+	bool hasPressedJump;
 	UPROPERTY()
 	FRotator StartRotation;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStaticMeshComponent* MeshComponent;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UCapsuleComponent* CapsuleComponent;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
+	float MovementSpeed = 2;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
+	float JumpForce = 3000;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
+	float GroundTraceLength;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Collision")
+	TArray<TEnumAsByte<EObjectTypeQuery>> GroundTraceObjectQueryType;
+public:
+	const float BaseLives = 3;
+	float CurrentLives;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
-	float MovementSpeed;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
-	float JumpForce;
+protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	bool GroundCheck();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SetRotationalAxis(FRotator Rotation);
 	void Move(const FInputActionValue& Value);
 	void StopMove();
+	void StopJump();
 	void Jump();
+	void ResetVelocity();
 
 };

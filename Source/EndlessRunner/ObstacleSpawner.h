@@ -33,7 +33,20 @@ protected:
 	bool bTileSpawn;
 	UPROPERTY(EditAnyWhere, Category = Spawn)
 	float SpawnRateInSeconds = 2.0f;
+
+
+	//In seconds
+	UPROPERTY(EditAnywhere, Category = Time)
+	float SpeedIncreaseFrequency = 10;
+
+	UPROPERTY(EditAnywhere, Category = Time)
+	float SpeedIncreaseAmount = 50;
+
 #pragma endregion
+
+	float SpeedIncreaseTimer = 0;
+	float CurrentObjectSpeed = 0;
+	float DefaultSpawnSpawnRate = 0;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

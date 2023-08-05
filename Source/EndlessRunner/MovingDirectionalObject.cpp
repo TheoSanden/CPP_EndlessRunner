@@ -2,6 +2,7 @@
 
 
 #include "MovingDirectionalObject.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AMovingDirectionalObject::AMovingDirectionalObject()
@@ -14,6 +15,7 @@ AMovingDirectionalObject::AMovingDirectionalObject()
 	FrontAttachmentPoint->SetupAttachment(RootComponent);
 	AssAttachmentPoint->SetupAttachment(RootComponent);
 	*/
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("Main Mesh"));
 }
 // Called when the game starts or when spawned
 void AMovingDirectionalObject::BeginPlay()

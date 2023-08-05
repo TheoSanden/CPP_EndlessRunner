@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputMappingContext.h"
 #include "MovableCharacter.h"
+#include "ScoreTracker.h"
 #include "DA_PlayerInput.h"
 #include "GameFramework/GameModeBase.h"
 #include "LocalMultiplayerInputManager.h"
@@ -21,17 +22,26 @@ class AEndlessRunnerGameMode : public AGameModeBase
 	TSubclassOf<AMovableCharacter> PlayerClass;
 
 	UPROPERTY()
-	TSubclassOf<ALocalMultiplayerInputManager> LocalMultiplayerInputManager;
+	TSubclassOf<ALocalMultiplayerInputManager> LocalMultiplayerInputManagerClass;
 
 	UPROPERTY()
-		ALocalMultiplayerInputManager* LMIM_Instance;
+	ALocalMultiplayerInputManager* LMIM_Instance;
+
+	UPROPERTY()
+	TSubclassOf<AScoreTracker> ScoreTrackerClass;
+
+	UPROPERTY()
+	AScoreTracker* ScoreTracker;
+
+	UPROPERTY()
+	TArray<AActor*> PlayerStarts;
 protected:
 
 	UPROPERTY()
 	UDA_PlayerInput* PlayerInputDataAsset;
 
 	UPROPERTY()
-		int CharacterBindingIndex = 0;
+	int CharacterBindingIndex = 0;
 
 	virtual void BeginPlay() override;
 public:
@@ -39,6 +49,8 @@ public:
 	AEndlessRunnerGameMode();
 
 	void InitializePlayerInput();
+	void RespawnPlayer(AMovableCharacter* Character);
+	void ChangePlayerScore(AMovableCharacter* Character, int Amount);
 };
 
 

@@ -42,7 +42,8 @@ void ALocalMultiplayerInputManager::SetupPlayerInputComponent(UInputComponent* P
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
-			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P1_JumpAction, ETriggerEvent::Triggered, this, &ALocalMultiplayerInputManager::P1_Jump);
+			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P1_JumpAction, ETriggerEvent::Started, this, &ALocalMultiplayerInputManager::P1_Jump);
+			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P1_JumpAction, ETriggerEvent::Completed, this, &ALocalMultiplayerInputManager::P1_StopJump);
 
 			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_MoveAction, ETriggerEvent::Completed, this, &ALocalMultiplayerInputManager::P1_StopMove);
 			//Moving
@@ -50,7 +51,8 @@ void ALocalMultiplayerInputManager::SetupPlayerInputComponent(UInputComponent* P
 
 			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_MoveAction, ETriggerEvent::Triggered, this, &ALocalMultiplayerInputManager::P2_Move);
 
-			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_JumpAction, ETriggerEvent::Triggered, this, &ALocalMultiplayerInputManager::P2_Jump);
+			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_JumpAction, ETriggerEvent::Started, this, &ALocalMultiplayerInputManager::P2_Jump);
+			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_JumpAction, ETriggerEvent::Completed, this, &ALocalMultiplayerInputManager::P2_StopJump);
 
 			EnhancedInputComponent->BindAction(PlayerInputDataAsset->P2_MoveAction, ETriggerEvent::Completed, this, &ALocalMultiplayerInputManager::P2_StopMove);
 			//Moving
@@ -91,9 +93,17 @@ void ALocalMultiplayerInputManager::P1_Jump()
 {
 	P1->Jump();
 }
+void ALocalMultiplayerInputManager::P1_StopJump()
+{
+	P1->StopJump();
+}
 void ALocalMultiplayerInputManager::P2_Jump()
 {
 	P2->Jump();
+}
+void ALocalMultiplayerInputManager::P2_StopJump()
+{
+	P2->StopJump();
 }
 void ALocalMultiplayerInputManager::P1_StopMove()
 {

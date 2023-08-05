@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
 #include "MovingDirectionalObject.generated.h"
+
 
 UCLASS()
 class ENDLESSRUNNER_API AMovingDirectionalObject : public AActor
@@ -29,6 +31,8 @@ protected:
 	float BaseMovementSpeed = 100.0f;
 	virtual void UpdateMovement(float DeltaTime);
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UStaticMeshComponent* MeshComponent;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void Set(FVector Position, FVector Direction);
