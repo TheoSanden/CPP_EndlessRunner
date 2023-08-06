@@ -24,6 +24,12 @@ void AMovableCharacter::BeginPlay()
 	CurrentLives = BaseLives;
 	
 }
+void AMovableCharacter::SetDeadState(bool DeadState)
+{
+	IsDead = DeadState;
+	SetActorHiddenInGame(DeadState);
+	CapsuleComponent->SetCollisionEnabled((DeadState)? ECollisionEnabled::NoCollision: ECollisionEnabled::QueryOnly);
+}
 // Called every frame
 void AMovableCharacter::Tick(float DeltaTime)
 {

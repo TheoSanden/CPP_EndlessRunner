@@ -78,18 +78,30 @@ void AEndlessRunnerGameMode::RespawnPlayer(AMovableCharacter* Character)
 {
 	int playerIndex = (Character->GetUniqueID() == LMIM_Instance->P1->GetUniqueID()) ? 0 : (Character->GetUniqueID() == LMIM_Instance->P2->GetUniqueID() ? 1 : 99);
 	if (playerIndex == 99) { return; }
-	Character->SetActorLocation(PlayerStarts[playerIndex]->GetActorLocation());
 
 	Character->CurrentLives -= 1;
 	Character->ResetVelocity();
 
 	ScoreTracker->UpdatePlayerHealth(playerIndex, Character->CurrentLives);
 
-
-
 	//Maybe move
-	float PointsLossAmount = 25;
+	float PointsLossAmount = 100;
 	ScoreTracker->ChangePlayerScore(playerIndex,-PointsLossAmount);
+
+	if(Character->CurrentLives <= 0)
+	{
+		Character->SetDeadState(true);
+		ScoreTracker->TogglePlayerScore(playerIndex,false);
+
+		if(LMIM_Instance->P1->CurrentLives <= 0 && LMIM_Instance->P2->CurrentLives <= 0 && !HasSavedScore)
+		{
+			HasSavedScore = true;
+			ScoreTracker->SaveScoresToFile();
+			ScoreTracker->DisplayHighScoreWidget(true);
+		}
+		return;
+	}
+	Character->SetActorLocation(PlayerStarts[playerIndex]->GetActorLocation());
 }
 void AEndlessRunnerGameMode::ChangePlayerScore(AMovableCharacter* Character, int Amount)
 {

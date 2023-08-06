@@ -43,8 +43,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	bool GroundCheck();
+
+	bool IsDead = false;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -54,5 +55,5 @@ public:
 	void StopJump();
 	void Jump();
 	void ResetVelocity();
-
+	void SetDeadState(bool DeadState);
 };

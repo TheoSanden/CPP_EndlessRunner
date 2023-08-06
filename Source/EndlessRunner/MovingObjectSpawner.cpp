@@ -15,9 +15,44 @@ AMovingObjectSpawner::AMovingObjectSpawner()
 void AMovingObjectSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Initialize();
 }
 
+TSubclassOf<AMovingDirectionalObject> AMovingObjectSpawner::GetClassToSpawn()
+{
+	int RandomWeight = FMath::RandRange(0, LastIndexWeightReference);
+
+	for(int i = 0; i < CompoundedWeights.Num()-1; i++)
+	{
+		if(RandomWeight >= CompoundedWeights[i] && RandomWeight < CompoundedWeights[i+1])
+		{
+			return WeightedObjectsArray[i].Object;
+		}
+	}
+	return WeightedObjectsArray[WeightedObjectsArray.Num()-1].Object;
+}
+void AMovingObjectSpawner::CalculateWeights()
+{
+	int CurrentCompoundedWeight = 0;
+
+	for(FWeightedMovingObjects WO : WeightedObjectsArray)
+	{
+		CompoundedWeights.Add(CurrentCompoundedWeight);
+		CurrentCompoundedWeight += WO.Weight;
+	}
+	LastIndexWeightReference = CurrentCompoundedWeight;
+}
+void AMovingObjectSpawner::Initialize()
+{
+	for(FWeightedMovingObjects WO : WeightedObjectsArray)
+	{
+		ActorPooler<AMovingDirectionalObject>* NewPool = new ActorPooler<AMovingDirectionalObject>(GetWorld(), WO.Object);
+		NewPool->Populate(10);
+		PoolMap.Add(WO.Object, NewPool);
+	}
+	CalculateWeights();
+
+}
 // Called every frame
 void AMovingObjectSpawner::Tick(float DeltaTime)
 {
@@ -36,5 +71,22 @@ void AMovingObjectSpawner::CheckSpawn(float DeltaTime)
 		SpawnTimer -= SpawnRateInSeconds;
 	}
 	SpawnTimer += DeltaTime;
+}
+void AMovingObjectSpawner::EnqueueObject(TObjectPtr<AMovingDirectionalObject> obj)
+{
+	PoolMap[obj->GetClass()]->Enqueue(obj);
+}
+void AMovingObjectSpawner::Spawn(FVector Position)
+{
+	TObjectPtr<AMovingDirectionalObject> NewObstacle = PoolMap[GetClassToSpawn()]->Pop();
+	ActiveObjects.Add(NewObstacle);
+	if (DeafultObjectSpeed == 0)
+	{
+		NewObstacle->Set(Position, ObstacleTravelDirection.GetSafeNormal());
+	}
+	else
+	{
+		NewObstacle->Set(Position, ObstacleTravelDirection.GetSafeNormal(), CurrentObjectSpeed);
+	}
 }
 

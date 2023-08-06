@@ -12,7 +12,6 @@
 #include "EndlessRunnerGameMode.generated.h"
 
 class UInputMappingContext;
-
 UCLASS(minimalapi)
 class AEndlessRunnerGameMode : public AGameModeBase
 {
@@ -25,7 +24,8 @@ class AEndlessRunnerGameMode : public AGameModeBase
 	TSubclassOf<ALocalMultiplayerInputManager> LocalMultiplayerInputManagerClass;
 
 	UPROPERTY()
-	ALocalMultiplayerInputManager* LMIM_Instance;
+
+	TObjectPtr<ALocalMultiplayerInputManager> LMIM_Instance;
 
 	UPROPERTY()
 	TSubclassOf<AScoreTracker> ScoreTrackerClass;
@@ -35,6 +35,8 @@ class AEndlessRunnerGameMode : public AGameModeBase
 
 	UPROPERTY()
 	TArray<AActor*> PlayerStarts;
+
+	bool HasSavedScore = false;
 protected:
 
 	UPROPERTY()

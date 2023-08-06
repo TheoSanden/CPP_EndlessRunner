@@ -58,6 +58,7 @@ protected:
 	virtual void Spawn(FVector Position);
 	virtual void CheckSpawn(float DeltaTime);
 	virtual void CheckObstacleReachEnd();
+	virtual void EnqueueObject(TObjectPtr<AMovingDirectionalObject> obj);
 	virtual void UpdateObjectSpeed(float MovementSpeed);
 public:	
 	// Called every frame

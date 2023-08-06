@@ -79,9 +79,12 @@ void AObstacleSpawner::CheckObstacleReachEnd()
 	{
 		TObjectPtr<AMovingDirectionalObject> obj = ActiveObjects[0];
 		ActiveObjects.RemoveAt(0,1,true);
-		ObstaclePooler->Enqueue(obj);
-		
+		EnqueueObject(obj);
 	}
+}
+void AObstacleSpawner::EnqueueObject(TObjectPtr<AMovingDirectionalObject> obj)
+{
+	ObstaclePooler->Enqueue(obj);
 }
 
 void AObstacleSpawner::UpdateObjectSpeed(float MovementSpeed)
