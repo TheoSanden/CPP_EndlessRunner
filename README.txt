@@ -3,6 +3,10 @@ Endless Runner C++
 This is a project for a C++ course I took at futuregames. The goal was to create an Endless runner with effective use of c++, using appropriate storing methods, optimized code, and appropriate memory handling.
 Since I did not manage to create README for the first part i hope that an overarching document works for both hand-ins.
 
+How to play:
+
+The left player is controlled by WASD and the right player is controlled by the arrow keys. Each player has three lives. Try to avoid obstacles to not get knocked off the platform, if you get knocked of you lose one life. When both players are knocked out. The game is over and the scores are tallied.
+
 ----------------------------------------
 Table of Contents:
 
@@ -18,6 +22,7 @@ Table of Contents:
 3.Point system:
 
  -Score Tracker
+	-HighScoreSaveGame
 
 4.Game mode
 	
@@ -52,9 +57,15 @@ Point system:
 
 A character will gain points when jumping over an obstacle and passively when progressing through the level. You will also lose points when dying. When you jump over an obstacle the character will collider with an invisible collider; that object will send the character's Unique ID to the game mode and the game mode will communicate with the score tracker which character should get the points. I had a problem where the collision system would register muliple overlaps event withing the same frame and thus giving the character to many points. To solve this, I added a Hashset that records which players it has interacted with, which I then clear when the character exits the collider. I have to clear it like this because I reuse all obstacles and if I didn't the next time the character would jump over the same obstacle they wouldn't recieve the points.
 
+
 Score Tracker:
 
 The Score Tracker handles keeping score and updating the UI. It also handles saving the Highscore to the save file as well as displaying it.
+
+HighScoreSaveGame:
+
+The HighScoreSaveGame script inherits from Unreal's SaveGame class. It uses a custom struct, FSaveValues, which stores the players name and score when the game ends. 
+In the beginning I used pointers to FSavedValues that I created, however I had troubles reading the memory and often got corrupted values back. However, I realized that since I used pointers, those would point to memory adresses that didn't exist anymore since that memory was stored on RAM. The solution was to store these structs as direct values instead. The reason why storedthem as pointers was because I wanted to compare them in order to find which ones was from the current session. I solved this by generating a unique hash in the FSaveValues contstructor and making an overloaded operator to compare the two. That way I could know which values I had just stored. I also wrote two overloaded operators to compare which scores are bigger so that I could use a lambda function to rearrange the highscore list using Tarray::Sort. It seems like the highscores aren't saved in the packages version which unfortunatelly I do not have the time to fix, however the system is there.
 
 Game Mode: 
 Almost everything is handled through the game mode such as respawning the character, deciding when the game is over, adding score, and potentially destroying obstacles (Although I have not had the time to implement this). The only thing that the game mode handles directly is spawning and respawning players. Everything else is handled through the other scripts I've mentioned. The reason I put most script references in the game mode is because I did not want every object to have to have a reference to their manager scripts. For example, when you jump over an obstacle you gain points. The obstacle itself keeps track of this and sends its information to the game mode. The game mode is accessible from all actor scripts and so this bypasses the need to initialize all objects with a reference to the score tracker.
